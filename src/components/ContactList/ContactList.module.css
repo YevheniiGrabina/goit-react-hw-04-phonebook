@@ -1,0 +1,5 @@
+.contactList {
+    min-width: 300px;
+    padding: 10;
+    list-style-type: decimal-leading-zero;
+}

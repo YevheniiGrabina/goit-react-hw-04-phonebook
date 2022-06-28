@@ -1,0 +1,8 @@
+.contactItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 20px;
+    margin: 20px;
+
+}
