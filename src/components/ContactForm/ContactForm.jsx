@@ -1,28 +1,35 @@
-import React, { Component } from 'react';
+import {useState} from 'react'
 import PropTypes from 'prop-types';
 import s from './ContactForm.module.css';
 
-class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
+ const ContactForm = ({onSubmit}) => {
+    
+    const [name, setName] = useState('');
+    const [number, setNumber] = useState('');
+
+
+  const handleInputNameChange = e => {
+    const { value } = e.currentTarget;
+    
+      setName(value);
+    };
+
+  const handleInputNumberChange = e => {
+    const {value } = e.currentTarget;
+    setNumber( value)
   };
 
-  handleInputChange = e => {
-    const { name, value } = e.currentTarget;
-    this.setState({ [name]: value });
-  };
-
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    this.props.onSubmit(this.state);
-    this.setState({ name: '', number: '' });
+    onSubmit({name, number});
+    setName('');
+    setNumber('')
   };
 
-  render() {
-    const { name, number } = this.state;
+  
+   
     return (
-      <form className={s.form} action="submit" onSubmit={this.handleSubmit}>
+      <form className={s.form} action="submit" onSubmit={handleSubmit}>
         <label className={s.form__label}>
           Name
           <input
@@ -32,7 +39,7 @@ class ContactForm extends Component {
             title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
             required
             value={name}
-            onChange={this.handleInputChange}
+            onChange={handleInputNameChange}
           />
         </label>
         <label className={s.form__label}>
@@ -44,7 +51,7 @@ class ContactForm extends Component {
             title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
             required
             value={number}
-            onChange={this.handleInputChange}
+            onChange={handleInputNumberChange}
           />
         </label>
         <button className={s.submitBtn} type="submit">
@@ -53,10 +60,10 @@ class ContactForm extends Component {
       </form>
     );
   }
-}
 
 ContactForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
 };
 
 export default ContactForm;
+

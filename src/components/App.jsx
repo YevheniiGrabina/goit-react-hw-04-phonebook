@@ -1,99 +1,102 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react'
 import { nanoid } from 'nanoid';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import ContactForm from './ContactForm/ContactForm';
 import Filter from './Filter/Filter';
 import ContactList from './ContactList/ContactList';
 import s from './containerApp.module.css';
 
-class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+export const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState('');
 
-    componentDidMount() {
+  useEffect(() => {
     const contacts = localStorage.getItem('contacts');
     const parsedContacts = JSON.parse(contacts);
 
     if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
+      setContacts(parsedContacts);
     }
-  }
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
-  
-  handleFilterChange = e => {
-    const { name, value } = e.currentTarget;
-    this.setState({ [name]: value });
-  };
+  }, []);
 
-  filteredContacts = () => {
-    const filterNormalize = this.state.filter.toLowerCase();
-    return this.state.contacts
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+
+  
+  const handleFilterChange = e => {
+   
+    setFilter(e.currentTarget.value);
+  };
+  
+
+  const filteredContacts = () => {
+    const filterNormalize = filter.toLowerCase();
+    
+    return contacts
       .filter(contact => {
         return contact.name.toLowerCase().includes(filterNormalize);
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   };
 
-  formSubmit = ({ name, number }) => {
-    this.setState(prevState => {
-      const { contacts } = prevState;
-      const isContact = contacts.find(
-        contact => contact.name.toLowerCase() === name.toLowerCase()
-      );
+  
 
-      if (isContact) {
-        alert(`${name} is already in contact`);
-        return contacts;
-      } else {
-        return {
-          contacts: [
-            {
-              id: nanoid(),
-              name,
-              number,
-            },
-            ...contacts,
-          ],
+   const formSubmit = ({ name, number }) => {
+    const isContact = contacts.find(contact => contact.name.toLowerCase() === name.toLowerCase());
+    if (isContact) {
+       toast.warn(`${name} is already in contact`, {
+          theme: 'colored',
+          autoClose: 4000,
+          pauseOnHover: true,
+          closeOnClick: true,
+        });
+    } else {
+      setContacts(state => {
+        const newContact = {
+          id: nanoid(5),
+          name,
+          number,
         };
-      }
-    });
+        return [newContact, ...state];
+      });
+    }
   };
 
-  contactDelete = id => {
-    this.setState(prevState => {
-      const { contacts } = prevState;
-      const contactsAfterDelete = contacts.filter(contact => contact.id !== id);
-      return { contacts: [...contactsAfterDelete] };
-    });
+  const contactDelete = id => {
+    setContacts(state => state.filter(contact => contact.id !== id));
   };
 
-  render() {
-    const { filter } = this.state;
-    return (
-      <div className={s.containerApp}>
+  return (
+     <div className={s.containerApp}>
         <h1>Phone Book</h1>
-        <ContactForm onSubmit={this.formSubmit} />
+        <ContactForm onSubmit={formSubmit} />
         <div className={s.containerContacts}>
           <h2>Contacts</h2>
           <Filter
             title="Find contact by name"
-            onChange={this.handleFilterChange}
+            onChange={handleFilterChange}
             value={filter}
           />
 
           <ContactList
-            filteredContacts={this.filteredContacts()}
-            onDelete={this.contactDelete}
+            filteredContacts={filteredContacts()}
+            onDelete={contactDelete}
+          />
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
           />
         </div>
       </div>
-    );
-  }
-}
-
-export default App;
+  );
+};
